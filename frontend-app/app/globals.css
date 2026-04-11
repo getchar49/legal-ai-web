@@ -1,0 +1,38 @@
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.diffusion-shadow {
+  box-shadow: 0 12px 32px rgba(25, 28, 29, 0.04);
+}
+
+.legal-gradient {
+  background: linear-gradient(135deg, #000666 0%, #1a237e 100%);
+}
+
+.legal-pattern {
+  background-color: #f8f9fa;
+  background-image: radial-gradient(#1a237e 0.5px, transparent 0.5px);
+  background-size: 24px 24px;
+  opacity: 0.05;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #f8f9fa;
+  color: #191c1d;
+  font-family: Inter, sans-serif;
+}
