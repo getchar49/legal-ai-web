@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CHAT_UI_VISIBILITY } from "@/components/chat/chatUiConfig";
 type HeaderProps = {
   hasToken: boolean;
   onLogout: () => void;
@@ -32,24 +33,30 @@ export default function Header({
           Tư vấn pháp luật
         </span>
         <nav className="hidden md:flex gap-6">
-          <a
-            href="#"
-            className="text-indigo-900 dark:text-indigo-100 border-b-2 border-indigo-900 dark:border-indigo-400 pb-1 font-headline font-semibold text-sm"
-          >
-            Dashboard
-          </a>
-          <a
-            href="#"
-            className="text-slate-500 dark:text-slate-400 hover:text-indigo-800 font-headline font-semibold text-sm transition-opacity"
-          >
-            Analytics
-          </a>
-          <a
-            href="#"
-            className="text-slate-500 dark:text-slate-400 hover:text-indigo-800 font-headline font-semibold text-sm transition-opacity"
-          >
-            Team
-          </a>
+          {CHAT_UI_VISIBILITY.headerNav.showDashboard ? (
+            <a
+              href="#"
+              className="text-indigo-900 dark:text-indigo-100 border-b-2 border-indigo-900 dark:border-indigo-400 pb-1 font-headline font-semibold text-sm"
+            >
+              Dashboard
+            </a>
+          ) : null}
+          {CHAT_UI_VISIBILITY.headerNav.showAnalytics ? (
+            <a
+              href="#"
+              className="text-slate-500 dark:text-slate-400 hover:text-indigo-800 font-headline font-semibold text-sm transition-opacity"
+            >
+              Analytics
+            </a>
+          ) : null}
+          {CHAT_UI_VISIBILITY.headerNav.showTeam ? (
+            <a
+              href="#"
+              className="text-slate-500 dark:text-slate-400 hover:text-indigo-800 font-headline font-semibold text-sm transition-opacity"
+            >
+              Team
+            </a>
+          ) : null}
         </nav>
       </div>
 
@@ -68,9 +75,11 @@ export default function Header({
           <button className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
             <span className="material-symbols-outlined">notifications</span>
           </button>
-          <button className="hidden sm:inline-flex p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
-            <span className="material-symbols-outlined">account_balance</span>
-          </button>
+          {CHAT_UI_VISIBILITY.headerActions.showHomeShortcut ? (
+            <button className="hidden sm:inline-flex p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
+              <span className="material-symbols-outlined">account_balance</span>
+            </button>
+          ) : null}
           <button
             onClick={onLogout}
             className="text-xs sm:text-sm font-headline font-semibold px-3 sm:px-4 py-2 rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors"

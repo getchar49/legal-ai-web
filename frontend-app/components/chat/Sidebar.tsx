@@ -7,10 +7,82 @@ import {
   getHistoryDetailRoute,
   requestJson,
 } from "@/app/_lib/api-client";
+import {
+  CHAT_UI_VISIBILITY,
+  GENERIC_HISTORY_TITLE_PATTERNS,
+} from "@/components/chat/chatUiConfig";
 
 type HistoryItem = {
   id: string;
   title: string;
+};
+
+type RecentDocumentItem = {
+  id: string;
+  title: string;
+  icon: string;
+};
+
+const DEFAULT_HISTORY_TITLE = "Cuộc trò chuyện chưa có tiêu đề";
+
+const normalizeText = (value: unknown): string =>
+  (typeof value === "string" ? value : "").replace(/\s+/g, " ").trim();
+
+const truncateText = (value: string, maxLength: number): string => {
+  if (value.length <= maxLength) {
+    return value;
+  }
+  return `${value.slice(0, maxLength - 1).trimEnd()}…`;
+};
+
+const isGenericHistoryTitle = (title: string): boolean => {
+  if (!title) {
+    return true;
+  }
+  const normalized = title.toLocaleLowerCase("vi-VN").trim();
+  return GENERIC_HISTORY_TITLE_PATTERNS.some((pattern) => pattern.test(normalized));
+};
+
+const getFirstQuestionFromMessages = (messages: unknown): string => {
+  if (!Array.isArray(messages)) {
+    return "";
+  }
+
+  for (const item of messages) {
+    const message = item as Record<string, unknown>;
+    const role = normalizeText(message.role).toLowerCase();
+    if (role && role !== "user") {
+      continue;
+    }
+    const candidate = normalizeText(message.content ?? message.text);
+    if (candidate) {
+      return candidate;
+    }
+  }
+
+  return "";
+};
+
+const resolveHistoryTitle = (entry: Record<string, unknown>): string => {
+  const candidates = [
+    entry.summary,
+    entry.title,
+    entry.first_message,
+    entry.first_user_message,
+    entry.first_question,
+    entry.question,
+    entry.prompt,
+    entry.name,
+    getFirstQuestionFromMessages(entry.messages),
+  ];
+
+  const title =
+    candidates
+      .map((candidate) => normalizeText(candidate))
+      .find((candidate) => candidate.length > 0 && !isGenericHistoryTitle(candidate)) ??
+    "";
+  const finalTitle = title || DEFAULT_HISTORY_TITLE;
+  return truncateText(finalTitle, CHAT_UI_VISIBILITY.history.titleMaxLength);
 };
 
 type SidebarProps = {
@@ -36,6 +108,21 @@ export default function Sidebar({
   activeConversationId,
   refreshKey = 0,
 }: SidebarProps) {
+  const recentDocuments: RecentDocumentItem[] =
+    CHAT_UI_VISIBILITY.sidebar.showLaborContractTemplate
+      ? [
+          {
+            id: "sample-labor-contract",
+            title: "Hợp đồng lao động mẫu",
+            icon: "description",
+          },
+        ]
+      : [];
+
+  const shouldShowRecentDocumentsSection =
+    recentDocuments.length > 0 ||
+    CHAT_UI_VISIBILITY.sidebar.showRecentDocumentsWhenEmpty;
+
   const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
@@ -66,13 +153,7 @@ export default function Sidebar({
           const id = String(
             entry.id ?? entry._id ?? entry.conversation_id ?? index,
           );
-          const title = String(
-            entry.title ??
-              entry.first_message ??
-              entry.name ??
-              entry.question ??
-              `Cuộc trò chuyện ${index + 1}`,
-          );
+          const title = resolveHistoryTitle(entry);
           return { id, title };
         });
 
@@ -217,17 +298,26 @@ export default function Sidebar({
           </p>
         )}
 
-        <div className="mt-6">
-          <h2 className="px-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 mb-3">
-            Tài liệu gần đây
-          </h2>
-          <div className="text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800/50 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer">
-            <span className="material-symbols-outlined text-xl">description</span>
-            <span className="font-headline font-medium text-sm tracking-wide truncate">
-              Hợp đồng lao động mẫu
-            </span>
+        {shouldShowRecentDocumentsSection ? (
+          <div className="mt-6">
+            <h2 className="px-4 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant/50 mb-3">
+              Tài liệu gần đây
+            </h2>
+            {recentDocuments.map((document) => (
+              <div
+                key={document.id}
+                className="text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800/50 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-xl">
+                  {document.icon}
+                </span>
+                <span className="font-headline font-medium text-sm tracking-wide truncate">
+                  {document.title}
+                </span>
+              </div>
+            ))}
           </div>
-        </div>
+        ) : null}
       </nav>
 
       <div className="mt-auto border-t border-outline-variant/10 pt-4 space-y-1">
