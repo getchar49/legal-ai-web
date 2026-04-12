@@ -324,13 +324,13 @@ export default function Sidebar({
         <div className="text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer">
           <span className="material-symbols-outlined text-xl">settings</span>
           <span className="font-headline font-medium text-sm tracking-wide">
-            Settings
+            Cài đặt
           </span>
         </div>
         <div className="text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer">
           <span className="material-symbols-outlined text-xl">help_outline</span>
           <span className="font-headline font-medium text-sm tracking-wide">
-            Support
+            Hỗ trợ
           </span>
         </div>
         {hasToken ? (

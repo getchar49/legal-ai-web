@@ -70,7 +70,7 @@ export default function LoginPage() {
               </p>
             </div>
 
-            <form className="space-y-6" onSubmit={handleSubmit}>
+            <form className="space-y-6" method="POST" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <label
                   className="block text-xs font-semibold text-on-surface-variant uppercase tracking-wider"
