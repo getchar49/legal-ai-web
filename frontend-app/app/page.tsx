@@ -110,6 +110,13 @@ export default function Home() {
   const [activeConversationId, setActiveConversationId] = useState("");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [isLoadingConversation, setIsLoadingConversation] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setIsSidebarOpen(false);
+    }
+  }, []);
 
   const transport = useMemo(
     () =>
@@ -202,6 +209,12 @@ export default function Home() {
     setInput("");
   }, [setMessages]);
 
+  const closeSidebarOnMobile = useCallback(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setIsSidebarOpen(false);
+    }
+  }, []);
+
   const createConversation = useCallback(async () => {
     const data = await requestJson<unknown>(API_ROUTES.history, {
       method: "POST",
@@ -219,12 +232,17 @@ export default function Home() {
     if (!isAuthenticated) {
       return;
     }
+    if (messages.length === 0) {
+      setSessionMessage("Hãy gửi ít nhất 1 tin nhắn trước khi tạo cuộc trò chuyện mới.");
+      return;
+    }
     setSessionMessage(null);
     handleClearMessages();
     try {
       const conversationId = await createConversation();
       setActiveConversationId(conversationId);
       setHistoryRefreshKey((prev) => prev + 1);
+      closeSidebarOnMobile();
     } catch (error) {
       const message =
         error instanceof Error
@@ -237,7 +255,14 @@ export default function Home() {
       setSessionMessage(message);
       setActiveConversationId("");
     }
-  }, [createConversation, handleClearMessages, handleLogout, isAuthenticated]);
+  }, [
+    createConversation,
+    closeSidebarOnMobile,
+    handleClearMessages,
+    handleLogout,
+    isAuthenticated,
+    messages.length,
+  ]);
 
   const handleOpenConversation = useCallback(
     async (conversationId: string) => {
@@ -258,6 +283,7 @@ export default function Home() {
         setMessages(normalizedMessages);
         setInput("");
         setActiveConversationId(conversationId);
+        closeSidebarOnMobile();
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Không thể mở cuộc trò chuyện.";
@@ -270,7 +296,7 @@ export default function Home() {
         setIsLoadingConversation(false);
       }
     },
-    [handleLogout, isAuthenticated, setMessages],
+    [closeSidebarOnMobile, handleLogout, isAuthenticated, setMessages],
   );
 
   const handleConversationDeleted = useCallback(
@@ -302,6 +328,14 @@ export default function Home() {
     },
     [handleOpenConversation],
   );
+
+  const handleToggleSidebar = useCallback(() => {
+    setIsSidebarOpen((prev) => !prev);
+  }, []);
+
+  const handleCloseSidebar = useCallback(() => {
+    setIsSidebarOpen(false);
+  }, []);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -346,21 +380,63 @@ export default function Home() {
   };
 
   return (
-    <div className="bg-background font-body text-on-surface flex h-screen overflow-hidden">
-      <Sidebar
-        hasToken={isAuthenticated}
-        onNewChat={handleNewChatClick}
-        onLogout={handleLogoutClick}
-        onAuthExpired={handleAuthExpired}
-        onOpenConversation={handleOpenConversationClick}
-        onConversationDeleted={handleConversationDeleted}
-        activeConversationId={activeConversationId}
-        refreshKey={historyRefreshKey}
-      />
+    <div className="bg-background font-body text-on-surface flex h-screen overflow-hidden relative">
+      {isSidebarOpen ? (
+        <button
+          type="button"
+          className="lg:hidden fixed inset-0 bg-black/35 z-40"
+          onClick={handleCloseSidebar}
+          aria-label="Đóng sidebar"
+        />
+      ) : null}
+
+      <div
+        className={`lg:hidden fixed inset-y-0 left-0 w-72 z-50 transition-transform duration-300 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <Sidebar
+          hasToken={isAuthenticated}
+          onNewChat={handleNewChatClick}
+          onLogout={handleLogoutClick}
+          onAuthExpired={handleAuthExpired}
+          onCloseSidebar={handleCloseSidebar}
+          onOpenConversation={handleOpenConversationClick}
+          onConversationDeleted={handleConversationDeleted}
+          activeConversationId={activeConversationId}
+          refreshKey={historyRefreshKey}
+        />
+      </div>
+
+      <div
+        className={`hidden lg:block h-screen flex-shrink-0 transition-[width] duration-300 ${
+          isSidebarOpen ? "w-72" : "w-0"
+        }`}
+      >
+        <div
+          className={`h-full transition-opacity duration-200 ${
+            isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        >
+          <Sidebar
+            hasToken={isAuthenticated}
+            onNewChat={handleNewChatClick}
+            onLogout={handleLogoutClick}
+            onAuthExpired={handleAuthExpired}
+            onOpenConversation={handleOpenConversationClick}
+            onConversationDeleted={handleConversationDeleted}
+            activeConversationId={activeConversationId}
+            refreshKey={historyRefreshKey}
+          />
+        </div>
+      </div>
+
       <main className="flex-1 flex flex-col relative bg-surface overflow-hidden">
         <Header
           hasToken={isAuthenticated}
           onLogout={handleLogoutClick}
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={handleToggleSidebar}
         />
         {sessionMessage ? (
           <div className="mx-4 mt-3 rounded-lg bg-amber-100 px-4 py-2 text-sm text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">

@@ -18,6 +18,7 @@ type SidebarProps = {
   onNewChat: () => void;
   onLogout: () => void;
   onAuthExpired: () => void;
+  onCloseSidebar?: () => void;
   onOpenConversation: (conversationId: string) => void;
   onConversationDeleted: (conversationId: string) => void;
   activeConversationId?: string;
@@ -29,6 +30,7 @@ export default function Sidebar({
   onNewChat,
   onLogout,
   onAuthExpired,
+  onCloseSidebar,
   onOpenConversation,
   onConversationDeleted,
   activeConversationId,
@@ -127,14 +129,24 @@ export default function Sidebar({
   };
 
   return (
-    <aside className="h-screen w-72 flex-shrink-0 bg-slate-100 dark:bg-slate-900 flex-col py-6 px-4 hidden lg:flex">
-      <div className="mb-8">
-        <h1 className="text-xl font-bold tracking-tighter text-indigo-900 dark:text-indigo-100 font-headline">
-          The Sovereign Associate
-        </h1>
-        <p className="text-xs text-on-surface-variant opacity-70 tracking-wide mt-1">
-          Elite Legal Intelligence
-        </p>
+    <aside className="h-full w-full bg-slate-100 dark:bg-slate-900 flex flex-col py-6 px-4">
+      <div className="mb-8 flex items-start justify-between gap-2">
+        <div>
+          <h1 className="text-xl font-bold tracking-tighter text-indigo-900 dark:text-indigo-100 font-headline">
+            The Sovereign Associate
+          </h1>
+          <p className="text-xs text-on-surface-variant opacity-70 tracking-wide mt-1">
+            Elite Legal Intelligence
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onCloseSidebar}
+          className="lg:hidden p-2 text-on-surface-variant hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors"
+          aria-label="Đóng sidebar"
+        >
+          <span className="material-symbols-outlined">close</span>
+        </button>
       </div>
 
       <button

@@ -57,7 +57,7 @@ export default function MessageInput({
   };
 
   return (
-    <footer className="w-full px-6 md:px-20 lg:px-48 pb-8 bg-gradient-to-t from-surface via-surface to-transparent pt-10">
+    <footer className="w-full px-3 sm:px-6 md:px-12 lg:px-24 xl:px-40 pb-4 sm:pb-8 bg-gradient-to-t from-surface via-surface to-transparent pt-5 sm:pt-8">
       <div className="max-w-5xl mx-auto relative group">
         <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/10 to-indigo-500/10 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
         <form
@@ -73,7 +73,7 @@ export default function MessageInput({
               Sở hữu trí tuệ
             </span>
           </div>
-          <div className="flex items-end gap-3 px-3 py-2">
+          <div className="flex items-end gap-2 sm:gap-3 px-2 sm:px-3 py-2">
             <button
               type="button"
               className="p-2 text-on-surface-variant hover:text-primary transition-colors mb-1"
@@ -85,7 +85,7 @@ export default function MessageInput({
               value={input}
               onChange={handleTextareaChange}
               onKeyDown={handleTextareaKeyDown}
-              className="flex-1 bg-transparent border-none focus:ring-0 text-base px-3 py-3 font-body resize-none leading-relaxed rounded-xl placeholder:text-on-surface-variant/70"
+              className="flex-1 bg-transparent border-none focus:ring-0 text-sm sm:text-base px-2 sm:px-3 py-3 font-body resize-none leading-relaxed rounded-xl placeholder:text-on-surface-variant/70"
               placeholder="Đặt câu hỏi về pháp luật..."
               rows={1}
               style={{ minHeight: "48px" }}

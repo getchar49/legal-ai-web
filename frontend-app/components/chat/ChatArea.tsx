@@ -79,7 +79,7 @@ function getMessageReasoning(message: ChatMessage): string {
 
 export default function ChatArea({ messages, isLoading, error }: ChatAreaProps) {
   return (
-    <section className="flex-1 overflow-y-auto px-6 md:px-20 lg:px-48 py-10 space-y-8 scroll-smooth">
+    <section className="flex-1 overflow-y-auto px-3 sm:px-6 md:px-12 lg:px-24 xl:px-40 py-6 sm:py-8 space-y-6 sm:space-y-8 scroll-smooth">
       <div className="flex justify-center">
         <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/40 bg-surface-container-low px-4 py-1 rounded-full">
           Hôm nay
@@ -105,7 +105,7 @@ export default function ChatArea({ messages, isLoading, error }: ChatAreaProps) 
           if (isUser) {
             return (
               <div key={message.id} className="flex flex-col items-end space-y-2">
-                <div className="bg-primary-container text-on-primary p-4 rounded-xl rounded-br-sm max-w-[85%] diffusion-shadow">
+                <div className="bg-primary-container text-on-primary p-3 sm:p-4 rounded-xl rounded-br-sm max-w-[92%] sm:max-w-[85%] diffusion-shadow">
                   <p className="font-headline text-[15px] font-medium leading-relaxed whitespace-pre-wrap">
                     {text}
                   </p>
@@ -127,7 +127,7 @@ export default function ChatArea({ messages, isLoading, error }: ChatAreaProps) 
                   The Sovereign AI
                 </span>
               </div>
-              <div className="bg-surface-container-highest p-6 rounded-xl max-w-[90%] space-y-4">
+              <div className="bg-surface-container-highest p-4 sm:p-6 rounded-xl max-w-[96%] sm:max-w-[90%] space-y-4">
                 {reasoning ? (
                   <details className="rounded-lg border border-outline-variant/30 bg-surface px-4 py-3">
                     <summary className="cursor-pointer text-xs font-semibold tracking-wide text-on-surface-variant">

@@ -4,13 +4,30 @@ import Link from "next/link";
 type HeaderProps = {
   hasToken: boolean;
   onLogout: () => void;
+  isSidebarOpen: boolean;
+  onToggleSidebar: () => void;
 };
 
-export default function Header({ hasToken, onLogout }: HeaderProps) {
+export default function Header({
+  hasToken,
+  onLogout,
+  isSidebarOpen,
+  onToggleSidebar,
+}: HeaderProps) {
 
   return (
-    <header className="w-full h-16 sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl flex items-center justify-between px-6 md:px-8">
-      <div className="flex items-center gap-8">
+    <header className="w-full h-16 sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl flex items-center justify-between px-3 sm:px-6 md:px-8">
+      <div className="flex items-center gap-3 sm:gap-8">
+        <button
+          type="button"
+          onClick={onToggleSidebar}
+          className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors"
+          aria-label={isSidebarOpen ? "Ẩn sidebar" : "Hiện sidebar"}
+        >
+          <span className="material-symbols-outlined">
+            {isSidebarOpen ? "menu_open" : "menu"}
+          </span>
+        </button>
         <span className="font-headline font-bold text-lg text-primary">
           Tư vấn pháp luật
         </span>
@@ -37,7 +54,7 @@ export default function Header({ hasToken, onLogout }: HeaderProps) {
       </div>
 
       {hasToken ? (
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-1 sm:gap-4">
           <div className="bg-surface-container-low rounded-full px-4 py-1.5 hidden md:flex items-center gap-2">
             <span className="material-symbols-outlined text-sm text-outline">
               search
@@ -51,12 +68,12 @@ export default function Header({ hasToken, onLogout }: HeaderProps) {
           <button className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
             <span className="material-symbols-outlined">notifications</span>
           </button>
-          <button className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
+          <button className="hidden sm:inline-flex p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
             <span className="material-symbols-outlined">account_balance</span>
           </button>
           <button
             onClick={onLogout}
-            className="text-sm font-headline font-semibold px-4 py-2 rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors"
+            className="text-xs sm:text-sm font-headline font-semibold px-3 sm:px-4 py-2 rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors"
           >
             Đăng xuất
           </button>
