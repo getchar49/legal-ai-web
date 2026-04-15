@@ -4,12 +4,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { API_ROUTES, requestJson } from "@/app/_lib/api-client";
+import { LOGIN_UI_VISIBILITY } from "@/app/login/loginUiConfig";
 
 export default function LoginPage() {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const shouldShowAlternativeLogin =
+    LOGIN_UI_VISIBILITY.showGoogleLogin || LOGIN_UI_VISIBILITY.showSsoLogin;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -148,30 +151,37 @@ export default function LoginPage() {
               ) : null}
             </form>
 
-            <div className="relative my-8">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-outline-variant/30" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase tracking-widest">
-                <span className="bg-surface-container-lowest px-4 text-outline font-medium">
-                  Hoặc tiếp tục với
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <button className="flex items-center justify-center gap-3 py-3 px-4 bg-surface-container-low hover:bg-surface-container-high rounded-xl transition-colors border border-outline-variant/10">
-                <span className="text-sm font-semibold text-on-surface">
-                  Google
-                </span>
-              </button>
-              <button className="flex items-center justify-center gap-3 py-3 px-4 bg-surface-container-low hover:bg-surface-container-high rounded-xl transition-colors border border-outline-variant/10">
-                <span className="material-symbols-outlined text-xl text-on-surface">
-                  shield_person
-                </span>
-                <span className="text-sm font-semibold text-on-surface">SSO</span>
-              </button>
-            </div>
+            {shouldShowAlternativeLogin ? (
+              <>
+                <div className="relative my-8">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-outline-variant/30" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase tracking-widest">
+                    <span className="bg-surface-container-lowest px-4 text-outline font-medium">
+                      Hoặc tiếp tục với
+                    </span>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {LOGIN_UI_VISIBILITY.showGoogleLogin ? (
+                    <button className="flex items-center justify-center gap-3 py-3 px-4 bg-surface-container-low hover:bg-surface-container-high rounded-xl transition-colors border border-outline-variant/10">
+                      <span className="text-sm font-semibold text-on-surface">
+                        Google
+                      </span>
+                    </button>
+                  ) : null}
+                  {LOGIN_UI_VISIBILITY.showSsoLogin ? (
+                    <button className="flex items-center justify-center gap-3 py-3 px-4 bg-surface-container-low hover:bg-surface-container-high rounded-xl transition-colors border border-outline-variant/10">
+                      <span className="material-symbols-outlined text-xl text-on-surface">
+                        shield_person
+                      </span>
+                      <span className="text-sm font-semibold text-on-surface">SSO</span>
+                    </button>
+                  ) : null}
+                </div>
+              </>
+            ) : null}
           </div>
 
           <div className="p-6 bg-surface-container-low text-center border-t border-outline-variant/15">

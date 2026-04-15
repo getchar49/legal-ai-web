@@ -62,19 +62,23 @@ export default function Header({
 
       {hasToken ? (
         <div className="flex items-center gap-1 sm:gap-4">
-          <div className="bg-surface-container-low rounded-full px-4 py-1.5 hidden md:flex items-center gap-2">
-            <span className="material-symbols-outlined text-sm text-outline">
-              search
-            </span>
-            <input
-              className="bg-transparent border-none focus:ring-0 text-sm w-48 font-body"
-              placeholder="Tìm kiếm vụ việc..."
-              type="text"
-            />
-          </div>
-          <button className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
-            <span className="material-symbols-outlined">notifications</span>
-          </button>
+          {CHAT_UI_VISIBILITY.headerActions.showCaseSearch ? (
+            <div className="bg-surface-container-low rounded-full px-4 py-1.5 hidden md:flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm text-outline">
+                search
+              </span>
+              <input
+                className="bg-transparent border-none focus:ring-0 text-sm w-48 font-body"
+                placeholder="Tìm kiếm vụ việc..."
+                type="text"
+              />
+            </div>
+          ) : null}
+          {CHAT_UI_VISIBILITY.headerActions.showNotifications ? (
+            <button className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
+              <span className="material-symbols-outlined">notifications</span>
+            </button>
+          ) : null}
           {CHAT_UI_VISIBILITY.headerActions.showHomeShortcut ? (
             <button className="hidden sm:inline-flex p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
               <span className="material-symbols-outlined">account_balance</span>

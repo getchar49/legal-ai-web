@@ -4,6 +4,7 @@ import type {
   FormEventHandler,
   KeyboardEventHandler,
 } from "react";
+import { CHAT_UI_VISIBILITY } from "@/components/chat/chatUiConfig";
 
 type MessageInputProps = {
   input: string;
@@ -65,21 +66,25 @@ export default function MessageInput({
           onSubmit={onSubmit}
           className="relative bg-surface-container-lowest diffusion-shadow rounded-2xl p-2 flex flex-col border border-outline-variant/10 focus-within:border-primary/30 transition-all"
         >
-          <div className="flex items-center gap-2 px-4 py-2 overflow-x-auto border-b border-outline-variant/5 mb-1">
-            <span className="text-[10px] font-bold text-primary-container bg-primary-fixed px-2 py-0.5 rounded uppercase">
-              Luật Dân sự
-            </span>
-            <span className="text-[10px] font-bold text-on-tertiary-container bg-tertiary-fixed px-2 py-0.5 rounded uppercase">
-              Sở hữu trí tuệ
-            </span>
-          </div>
+          {CHAT_UI_VISIBILITY.messageInput.showTopicTemplates ? (
+            <div className="flex items-center gap-2 px-4 py-2 overflow-x-auto border-b border-outline-variant/5 mb-1">
+              <span className="text-[10px] font-bold text-primary-container bg-primary-fixed px-2 py-0.5 rounded uppercase">
+                Luật Dân sự
+              </span>
+              <span className="text-[10px] font-bold text-on-tertiary-container bg-tertiary-fixed px-2 py-0.5 rounded uppercase">
+                Sở hữu trí tuệ
+              </span>
+            </div>
+          ) : null}
           <div className="flex items-end gap-2 sm:gap-3 px-2 sm:px-3 py-2">
-            <button
-              type="button"
-              className="p-2 text-on-surface-variant hover:text-primary transition-colors mb-1"
-            >
-              <span className="material-symbols-outlined">attach_file</span>
-            </button>
+            {CHAT_UI_VISIBILITY.messageInput.showAttachFile ? (
+              <button
+                type="button"
+                className="p-2 text-on-surface-variant hover:text-primary transition-colors mb-1"
+              >
+                <span className="material-symbols-outlined">attach_file</span>
+              </button>
+            ) : null}
             <textarea
               ref={textareaRef}
               value={input}

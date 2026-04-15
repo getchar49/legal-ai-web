@@ -3,7 +3,7 @@
 import { DefaultChatTransport, type UIMessage } from "ai";
 import { useChat } from "@ai-sdk/react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import ChatArea from "@/components/chat/ChatArea";
 import Header from "@/components/chat/Header";
@@ -20,17 +20,6 @@ type ConversationMetadata = {
 };
 
 type RawHistoryMessage = Record<string, unknown>;
-
-const resolveConversationId = (data: unknown): string => {
-  const entry = (data as Record<string, unknown>) ?? {};
-  const id =
-    entry.conversation_id ??
-    entry.id ??
-    entry._id ??
-    (entry.conversation as Record<string, unknown> | undefined)?.id ??
-    (entry.conversation as Record<string, unknown> | undefined)?._id;
-  return typeof id === "string" ? id : "";
-};
 
 const extractString = (
   value: unknown,
@@ -110,7 +99,10 @@ export default function Home() {
   const [activeConversationId, setActiveConversationId] = useState("");
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0);
   const [isLoadingConversation, setIsLoadingConversation] = useState(false);
+  const [isSwitchingConversation, setIsSwitchingConversation] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const conversationCacheRef = useRef<Map<string, UIMessage[]>>(new Map());
+  const openConversationRequestIdRef = useRef(0);
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
@@ -138,6 +130,8 @@ export default function Home() {
 
       setIsAuthenticated(false);
       setInput("");
+      setActiveConversationId("");
+      conversationCacheRef.current.clear();
       setSessionMessage(message ?? null);
       router.push("/login");
     },
@@ -184,7 +178,7 @@ export default function Home() {
     };
   }, [router]);
 
-  const { messages, sendMessage, setMessages, status, error } = useChat({
+  const { messages, sendMessage, setMessages, status, error, stop } = useChat({
     transport,
     onFinish: ({ message }) => {
       const metadata = (message.metadata ?? {}) as ConversationMetadata;
@@ -204,6 +198,13 @@ export default function Home() {
     },
   });
 
+  useEffect(() => {
+    if (!activeConversationId) {
+      return;
+    }
+    conversationCacheRef.current.set(activeConversationId, messages);
+  }, [activeConversationId, messages]);
+
   const handleClearMessages = useCallback(() => {
     setMessages([]);
     setInput("");
@@ -215,53 +216,24 @@ export default function Home() {
     }
   }, []);
 
-  const createConversation = useCallback(async () => {
-    const data = await requestJson<unknown>(API_ROUTES.history, {
-      method: "POST",
-      cache: "no-store",
-      fallbackErrorMessage: "Không thể tạo cuộc trò chuyện mới.",
-    });
-    const id = resolveConversationId(data);
-    if (!id) {
-      throw new Error("Không nhận được conversation_id từ backend.");
-    }
-    return id;
-  }, []);
-
   const handleNewChat = useCallback(async () => {
     if (!isAuthenticated) {
       return;
     }
-    if (messages.length === 0) {
-      setSessionMessage("Hãy gửi ít nhất 1 tin nhắn trước khi tạo cuộc trò chuyện mới.");
-      return;
-    }
+    setIsSwitchingConversation(true);
+    stop();
+    openConversationRequestIdRef.current += 1;
+    setIsLoadingConversation(false);
     setSessionMessage(null);
+    setActiveConversationId("");
     handleClearMessages();
-    try {
-      const conversationId = await createConversation();
-      setActiveConversationId(conversationId);
-      setHistoryRefreshKey((prev) => prev + 1);
-      closeSidebarOnMobile();
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Không thể tạo cuộc trò chuyện mới.";
-      if (/invalid token|not authenticated|401|unauthorized/i.test(message)) {
-        void handleLogout("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-        return;
-      }
-      setSessionMessage(message);
-      setActiveConversationId("");
-    }
+    closeSidebarOnMobile();
+    setIsSwitchingConversation(false);
   }, [
-    createConversation,
     closeSidebarOnMobile,
     handleClearMessages,
-    handleLogout,
     isAuthenticated,
-    messages.length,
+    stop,
   ]);
 
   const handleOpenConversation = useCallback(
@@ -269,7 +241,27 @@ export default function Home() {
       if (!conversationId || !isAuthenticated) {
         return;
       }
+      setIsSwitchingConversation(true);
+      if (conversationId === activeConversationId) {
+        closeSidebarOnMobile();
+        setIsSwitchingConversation(false);
+        return;
+      }
 
+      stop();
+      const cachedMessages = conversationCacheRef.current.get(conversationId);
+      if (cachedMessages) {
+        setMessages(cachedMessages);
+        setInput("");
+        setActiveConversationId(conversationId);
+        setSessionMessage(null);
+        closeSidebarOnMobile();
+        setIsSwitchingConversation(false);
+        return;
+      }
+
+      const requestId = openConversationRequestIdRef.current + 1;
+      openConversationRequestIdRef.current = requestId;
       setIsLoadingConversation(true);
       setSessionMessage(null);
       try {
@@ -279,12 +271,20 @@ export default function Home() {
           fallbackErrorMessage: "Không thể mở cuộc trò chuyện.",
         });
 
+        if (requestId !== openConversationRequestIdRef.current) {
+          return;
+        }
+
         const normalizedMessages = normalizeHistoryMessages(data);
+        conversationCacheRef.current.set(conversationId, normalizedMessages);
         setMessages(normalizedMessages);
         setInput("");
         setActiveConversationId(conversationId);
         closeSidebarOnMobile();
       } catch (error) {
+        if (requestId !== openConversationRequestIdRef.current) {
+          return;
+        }
         const message =
           error instanceof Error ? error.message : "Không thể mở cuộc trò chuyện.";
         if (/invalid token|not authenticated|401|unauthorized/i.test(message)) {
@@ -293,21 +293,33 @@ export default function Home() {
         }
         setSessionMessage(message);
       } finally {
-        setIsLoadingConversation(false);
+        if (requestId === openConversationRequestIdRef.current) {
+          setIsLoadingConversation(false);
+          setIsSwitchingConversation(false);
+        }
       }
     },
-    [closeSidebarOnMobile, handleLogout, isAuthenticated, setMessages],
+    [
+      activeConversationId,
+      closeSidebarOnMobile,
+      handleLogout,
+      isAuthenticated,
+      setMessages,
+      stop,
+    ],
   );
 
   const handleConversationDeleted = useCallback(
     (conversationId: string) => {
+      conversationCacheRef.current.delete(conversationId);
       setHistoryRefreshKey((prev) => prev + 1);
       if (conversationId === activeConversationId) {
+        stop();
         setActiveConversationId("");
         handleClearMessages();
       }
     },
-    [activeConversationId, handleClearMessages],
+    [activeConversationId, handleClearMessages, stop],
   );
 
   const handleNewChatClick = useCallback(() => {
@@ -344,22 +356,18 @@ export default function Home() {
       return;
     }
     setInput("");
+    setSessionMessage(null);
 
     void (async () => {
       try {
-        let conversationId = activeConversationId;
-        if (!conversationId) {
-          conversationId = await createConversation();
-          setActiveConversationId(conversationId);
-          setHistoryRefreshKey((prev) => prev + 1);
-        }
-
         await sendMessage(
           { text: value },
           {
-            body: {
-              conversation_id: conversationId,
-            },
+            body: activeConversationId
+              ? {
+                  conversation_id: activeConversationId,
+                }
+              : {},
           },
         );
       } catch (error) {
@@ -447,8 +455,8 @@ export default function Home() {
           messages={messages}
           isLoading={
             isLoadingConversation ||
-            status === "submitted" ||
-            status === "streaming"
+            (!isSwitchingConversation &&
+              (status === "submitted" || status === "streaming"))
           }
           error={error ?? undefined}
         />
@@ -457,6 +465,7 @@ export default function Home() {
           isLoading={
             isCheckingAuth ||
             isLoadingConversation ||
+            isSwitchingConversation ||
             status === "submitted" ||
             status === "streaming"
           }

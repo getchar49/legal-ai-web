@@ -321,18 +321,22 @@ export default function Sidebar({
       </nav>
 
       <div className="mt-auto border-t border-outline-variant/10 pt-4 space-y-1">
-        <div className="text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer">
-          <span className="material-symbols-outlined text-xl">settings</span>
-          <span className="font-headline font-medium text-sm tracking-wide">
-            Cài đặt
-          </span>
-        </div>
-        <div className="text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer">
-          <span className="material-symbols-outlined text-xl">help_outline</span>
-          <span className="font-headline font-medium text-sm tracking-wide">
-            Hỗ trợ
-          </span>
-        </div>
+        {CHAT_UI_VISIBILITY.sidebar.showSettings ? (
+          <div className="text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer">
+            <span className="material-symbols-outlined text-xl">settings</span>
+            <span className="font-headline font-medium text-sm tracking-wide">
+              Cài đặt
+            </span>
+          </div>
+        ) : null}
+        {CHAT_UI_VISIBILITY.sidebar.showSupport ? (
+          <div className="text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer">
+            <span className="material-symbols-outlined text-xl">help_outline</span>
+            <span className="font-headline font-medium text-sm tracking-wide">
+              Hỗ trợ
+            </span>
+          </div>
+        ) : null}
         {hasToken ? (
           <button
             onClick={onLogout}
