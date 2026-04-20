@@ -105,7 +105,7 @@ export default function ChatArea({ messages, isLoading, error }: ChatAreaProps) 
           if (isUser) {
             return (
               <div key={message.id} className="flex flex-col items-end space-y-2">
-                <div className="bg-primary-container text-on-primary p-3 sm:p-4 rounded-xl rounded-br-sm max-w-[92%] sm:max-w-[85%] diffusion-shadow">
+                <div className="bg-primary-container text-on-primary-container p-3 sm:p-4 rounded-xl rounded-br-sm max-w-[92%] sm:max-w-[85%] diffusion-shadow">
                   <p className="font-headline text-[15px] font-medium leading-relaxed whitespace-pre-wrap">
                     {text}
                   </p>

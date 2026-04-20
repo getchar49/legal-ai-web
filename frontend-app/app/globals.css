@@ -1,23 +1,192 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
+/* ==========================================================================
+ * Design Tokens — Material Design 3 inspired
+ * --------------------------------------------------------------------------
+ * All color tokens are stored as space-separated RGB triplets so Tailwind's
+ * `<alpha-value>` placeholder (e.g. `bg-primary/30`) keeps working. Tokens
+ * are mirrored between the light (`:root`) and dark (`.dark`) palettes so a
+ * single class like `bg-surface` adapts automatically across themes.
+ * ========================================================================== */
+:root {
+  color-scheme: light;
+
+  /* Surfaces & containers */
+  --color-background: 248 249 250;
+  --color-surface: 248 249 250;
+  --color-surface-bright: 248 249 250;
+  --color-surface-dim: 217 218 219;
+  --color-surface-container-lowest: 255 255 255;
+  --color-surface-container-low: 243 244 245;
+  --color-surface-container: 237 238 239;
+  --color-surface-container-high: 231 232 233;
+  --color-surface-container-highest: 225 227 228;
+  --color-surface-variant: 225 227 228;
+  --color-surface-tint: 76 86 175;
+  --color-inverse-surface: 46 49 50;
+  --color-inverse-on-surface: 240 241 242;
+  --color-inverse-primary: 189 194 255;
+
+  /* Foreground on surfaces */
+  --color-on-surface: 25 28 29;
+  --color-on-surface-variant: 69 70 82;
+  --color-on-background: 25 28 29;
+
+  /* Outlines / dividers */
+  --color-outline: 118 118 131;
+  --color-outline-variant: 198 197 212;
+
+  /* Primary */
+  --color-primary: 0 6 102;
+  --color-on-primary: 255 255 255;
+  --color-primary-container: 26 35 126;
+  --color-on-primary-container: 223 224 255;
+  --color-primary-fixed: 224 224 255;
+  --color-primary-fixed-dim: 189 194 255;
+  --color-on-primary-fixed: 0 7 103;
+  --color-on-primary-fixed-variant: 52 61 150;
+
+  /* Secondary */
+  --color-secondary: 88 92 128;
+  --color-on-secondary: 255 255 255;
+  --color-secondary-container: 210 212 255;
+  --color-on-secondary-container: 65 68 103;
+  --color-secondary-fixed: 224 224 255;
+  --color-secondary-fixed-dim: 193 195 237;
+  --color-on-secondary-fixed: 21 24 57;
+  --color-on-secondary-fixed-variant: 65 68 103;
+
+  /* Tertiary */
+  --color-tertiary: 123 46 18;
+  --color-on-tertiary: 255 255 255;
+  --color-tertiary-container: 255 219 208;
+  --color-on-tertiary-container: 92 24 0;
+  --color-tertiary-fixed: 255 219 208;
+  --color-tertiary-fixed-dim: 255 181 157;
+  --color-on-tertiary-fixed: 57 12 0;
+  --color-on-tertiary-fixed-variant: 123 46 18;
+
+  /* Status */
+  --color-error: 186 26 26;
+  --color-on-error: 255 255 255;
+  --color-error-container: 255 218 214;
+  --color-on-error-container: 147 0 10;
+
+  /* Decorative tokens used by .legal-gradient / .legal-pattern */
+  --gradient-hero: linear-gradient(135deg, #000666 0%, #1a237e 100%);
+  --pattern-dot: #1a237e;
+  --pattern-bg: #f8f9fa;
+  --pattern-opacity: 0.05;
+  --shadow-diffusion: 0 12px 32px rgba(25, 28, 29, 0.04);
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* Surfaces & containers */
+  --color-background: 17 19 24;
+  --color-surface: 17 19 24;
+  --color-surface-bright: 55 57 62;
+  --color-surface-dim: 17 19 24;
+  --color-surface-container-lowest: 12 14 19;
+  --color-surface-container-low: 25 28 32;
+  --color-surface-container: 29 32 36;
+  --color-surface-container-high: 39 42 47;
+  --color-surface-container-highest: 50 53 58;
+  --color-surface-variant: 69 70 79;
+  --color-surface-tint: 189 194 255;
+  --color-inverse-surface: 226 226 233;
+  --color-inverse-on-surface: 46 49 50;
+  --color-inverse-primary: 76 86 175;
+
+  /* Foreground on surfaces */
+  --color-on-surface: 226 226 233;
+  --color-on-surface-variant: 197 198 208;
+  --color-on-background: 226 226 233;
+
+  /* Outlines / dividers */
+  --color-outline: 143 144 154;
+  --color-outline-variant: 69 70 79;
+
+  /* Brand — `primary` is the only pair that flips for TEXT readability on
+     dark surfaces. `primary-container` and `on-primary(-container)` keep
+     their light-mode values because the design treats them as a stable
+     brand surface (deep navy + white text) used on dark CTAs, avatars and
+     chat bubbles. Intentionally NOT redefined here. */
+  --color-primary: 189 194 255;
+
+  /* Secondary */
+  --color-secondary: 193 195 237;
+  --color-on-secondary: 42 45 80;
+  --color-secondary-container: 65 68 103;
+  --color-on-secondary-container: 217 218 255;
+
+  /* Tertiary */
+  --color-tertiary: 255 181 157;
+  --color-on-tertiary: 92 24 0;
+  --color-tertiary-container: 123 46 18;
+  --color-on-tertiary-container: 255 219 208;
+
+  /* Status */
+  --color-error: 255 180 171;
+  --color-on-error: 105 0 5;
+  --color-error-container: 147 0 10;
+  --color-on-error-container: 255 218 214;
+
+  /* Decorative tokens — brand hero stays dark navy so it keeps working with
+     white `on-primary` text. Only lifted a touch to pop against the dark
+     canvas. */
+  --gradient-hero: linear-gradient(135deg, #000a8a 0%, #1a237e 55%, #343d96 140%);
+  --pattern-dot: #bdc2ff;
+  --pattern-bg: #111318;
+  --pattern-opacity: 0.08;
+  --shadow-diffusion: 0 12px 32px rgba(0, 0, 0, 0.55);
+}
+
+/* ==========================================================================
+ * Global element defaults — driven by tokens so they flip with the theme.
+ * ========================================================================== */
+html,
+body {
+  background-color: rgb(var(--color-background));
+  color: rgb(var(--color-on-surface));
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Inter, sans-serif;
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
+}
+
 .material-symbols-outlined {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
 }
 
+/* ==========================================================================
+ * Decorative utility classes — read from design tokens so they automatically
+ * adapt when switching between light/dark palettes.
+ * ========================================================================== */
 .diffusion-shadow {
-  box-shadow: 0 12px 32px rgba(25, 28, 29, 0.04);
+  box-shadow: var(--shadow-diffusion);
 }
 
 .legal-gradient {
-  background: linear-gradient(135deg, #000666 0%, #1a237e 100%);
+  background: var(--gradient-hero);
 }
 
 .legal-pattern {
-  background-color: #f8f9fa;
-  background-image: radial-gradient(#1a237e 0.5px, transparent 0.5px);
+  background-color: var(--pattern-bg);
+  background-image: radial-gradient(var(--pattern-dot) 0.5px, transparent 0.5px);
   background-size: 24px 24px;
-  opacity: 0.05;
+  opacity: var(--pattern-opacity);
 }
 
 .scrollbar-hide {
@@ -27,12 +196,4 @@
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  background: #f8f9fa;
-  color: #191c1d;
-  font-family: Inter, sans-serif;
 }

@@ -210,23 +210,25 @@ export default function Sidebar({
   };
 
   return (
-    <aside className="h-full w-full bg-slate-100 dark:bg-slate-900 flex flex-col py-6 px-4">
+    <aside className="flex h-full w-full flex-col border-r border-outline-variant/20 bg-surface-container-low px-4 py-6">
       <div className="mb-8 flex items-start justify-between gap-2">
         <div>
-          <h1 className="text-xl font-bold tracking-tighter text-indigo-900 dark:text-indigo-100 font-headline">
+          <h1 className="font-headline text-xl font-bold tracking-tighter text-primary">
             The Sovereign Associate
           </h1>
-          <p className="text-xs text-on-surface-variant opacity-70 tracking-wide mt-1">
+          <p className="mt-1 text-xs tracking-wide text-on-surface-variant opacity-80">
             Elite Legal Intelligence
           </p>
         </div>
         <button
           type="button"
           onClick={onCloseSidebar}
-          className="lg:hidden p-2 text-on-surface-variant hover:bg-slate-200 dark:hover:bg-slate-800 rounded-full transition-colors"
+          className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 lg:hidden"
           aria-label="Đóng sidebar"
         >
-          <span className="material-symbols-outlined">close</span>
+          <span aria-hidden className="material-symbols-outlined">
+            close
+          </span>
         </button>
       </div>
 
@@ -258,8 +260,8 @@ export default function Sidebar({
                   key={item.id}
                   className={
                     item.id === activeConversationId
-                      ? "group/history bg-white dark:bg-slate-800 text-indigo-900 dark:text-indigo-100 border-l-4 border-indigo-900 dark:border-indigo-400 flex items-center gap-2 px-2 py-2 rounded-r-lg transition-colors duration-200"
-                      : "group/history text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800/50 flex items-center gap-2 px-2 py-2 rounded-lg transition-colors duration-200"
+                      ? "group/history flex items-center gap-2 rounded-r-lg border-l-4 border-primary bg-surface-container-lowest px-2 py-2 text-primary transition-colors duration-200"
+                      : "group/history flex items-center gap-2 rounded-lg px-2 py-2 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container-high hover:text-on-surface"
                   }
                 >
                   <button
@@ -310,7 +312,7 @@ export default function Sidebar({
             {recentDocuments.map((document) => (
               <div
                 key={document.id}
-                className="text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800/50 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer"
+                className="flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container-high hover:text-on-surface"
               >
                 <span className="material-symbols-outlined text-xl">
                   {document.icon}
@@ -324,19 +326,23 @@ export default function Sidebar({
         ) : null}
       </nav>
 
-      <div className="mt-auto border-t border-outline-variant/10 pt-4 space-y-1">
+      <div className="mt-auto space-y-1 border-t border-outline-variant/20 pt-4">
         {CHAT_UI_VISIBILITY.sidebar.showSettings ? (
-          <div className="text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer">
-            <span className="material-symbols-outlined text-xl">settings</span>
-            <span className="font-headline font-medium text-sm tracking-wide">
+          <div className="flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container-high hover:text-on-surface">
+            <span aria-hidden className="material-symbols-outlined text-xl">
+              settings
+            </span>
+            <span className="font-headline text-sm font-medium tracking-wide">
               Cài đặt
             </span>
           </div>
         ) : null}
         {CHAT_UI_VISIBILITY.sidebar.showSupport ? (
-          <div className="text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer">
-            <span className="material-symbols-outlined text-xl">help_outline</span>
-            <span className="font-headline font-medium text-sm tracking-wide">
+          <div className="flex cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-on-surface-variant transition-colors duration-200 hover:bg-surface-container-high hover:text-on-surface">
+            <span aria-hidden className="material-symbols-outlined text-xl">
+              help_outline
+            </span>
+            <span className="font-headline text-sm font-medium tracking-wide">
               Hỗ trợ
             </span>
           </div>
@@ -344,18 +350,22 @@ export default function Sidebar({
         {hasToken ? (
           <button
             onClick={onLogout}
-            className="w-full text-left text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200 cursor-pointer"
+            className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-4 py-3 text-left text-on-surface-variant transition-colors duration-200 hover:bg-surface-container-high hover:text-on-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
-            <span className="material-symbols-outlined text-xl">logout</span>
-            <span className="font-headline font-medium text-sm tracking-wide">
+            <span aria-hidden className="material-symbols-outlined text-xl">
+              logout
+            </span>
+            <span className="font-headline text-sm font-medium tracking-wide">
               Đăng xuất
             </span>
           </button>
         ) : null}
         <div className="flex items-center gap-3 px-4 py-4">
-          <div className="w-10 h-10 rounded-full legal-gradient" />
+          <div className="legal-gradient h-10 w-10 rounded-full" />
           <div className="flex flex-col">
-            <span className="text-xs font-bold text-indigo-900">Luật sư cao cấp</span>
+            <span className="text-xs font-bold text-on-surface">
+              Luật sư cao cấp
+            </span>
             <span className="text-[10px] text-on-surface-variant">
               Thành viên Premium
             </span>

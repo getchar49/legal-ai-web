@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { API_ROUTES, requestJson } from "@/app/_lib/api-client";
 import { LOGIN_UI_VISIBILITY } from "@/app/login/loginUiConfig";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -42,10 +43,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-background font-body text-on-surface min-h-screen flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="bg-background font-body text-on-surface min-h-screen flex items-center justify-center p-4 sm:p-6 relative overflow-hidden">
       <div className="absolute inset-0 legal-pattern pointer-events-none" />
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary-fixed/30 rounded-full blur-3xl" />
       <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-secondary-fixed/20 rounded-full blur-3xl" />
+
+      <div className="absolute right-3 top-3 z-20 sm:right-6 sm:top-6">
+        <ThemeToggle />
+      </div>
 
       <main className="relative z-10 w-full max-w-[440px]">
         <div className="mb-10 text-center">
@@ -137,7 +142,7 @@ export default function LoginPage() {
               </div>
 
               <button
-                className="w-full py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary font-headline font-bold rounded-full diffusion-shadow hover:opacity-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                className="legal-gradient text-on-primary diffusion-shadow flex w-full items-center justify-center gap-2 rounded-full py-4 font-headline font-bold transition-all hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
                 type="submit"
                 disabled={isSubmitting}
               >
