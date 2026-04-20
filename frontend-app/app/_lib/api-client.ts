@@ -6,6 +6,7 @@ export const API_ROUTES = {
     session: "/api/auth/session",
   },
   chat: "/api/chat",
+  chatAgents: "/api/chat/agents",
   history: "/api/history",
 } as const;
 

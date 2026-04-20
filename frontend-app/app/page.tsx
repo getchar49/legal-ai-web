@@ -14,12 +14,21 @@ import {
   getHistoryDetailRoute,
   requestJson,
 } from "@/app/_lib/api-client";
+import {
+  clearChatAgentCatalogCache,
+  readChatAgentCatalog,
+  type ChatAgent,
+} from "@/app/_lib/chat-agent-catalog";
 
 type ConversationMetadata = {
   conversation_id?: string;
 };
 
 type RawHistoryMessage = Record<string, unknown>;
+type ChatAgentsApiResponse = {
+  default_agent_id?: string;
+  items?: unknown[];
+};
 
 const extractString = (
   value: unknown,
@@ -101,6 +110,10 @@ export default function Home() {
   const [isLoadingConversation, setIsLoadingConversation] = useState(false);
   const [isSwitchingConversation, setIsSwitchingConversation] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [availableAgents, setAvailableAgents] = useState<ChatAgent[]>([]);
+  const [selectedAgentId, setSelectedAgentId] = useState("");
+  const [isLoadingAgents, setIsLoadingAgents] = useState(false);
+  const [agentLoadError, setAgentLoadError] = useState<string | null>(null);
   const conversationCacheRef = useRef<Map<string, UIMessage[]>>(new Map());
   const openConversationRequestIdRef = useRef(0);
 
@@ -132,6 +145,10 @@ export default function Home() {
       setInput("");
       setActiveConversationId("");
       conversationCacheRef.current.clear();
+      clearChatAgentCatalogCache();
+      setAvailableAgents([]);
+      setSelectedAgentId("");
+      setAgentLoadError(null);
       setSessionMessage(message ?? null);
       router.push("/login");
     },
@@ -204,6 +221,64 @@ export default function Home() {
     }
     conversationCacheRef.current.set(activeConversationId, messages);
   }, [activeConversationId, messages]);
+
+  useEffect(() => {
+    let isDisposed = false;
+    if (!isAuthenticated) {
+      setAvailableAgents([]);
+      setSelectedAgentId("");
+      setAgentLoadError(null);
+      setIsLoadingAgents(false);
+      return () => {
+        isDisposed = true;
+      };
+    }
+
+    setIsLoadingAgents(true);
+    void (async () => {
+      try {
+        const catalog = await readChatAgentCatalog(
+          () =>
+            requestJson<ChatAgentsApiResponse>(API_ROUTES.chatAgents, {
+              method: "GET",
+              cache: "no-store",
+              fallbackErrorMessage: "Không thể tải danh sách model.",
+            }),
+          { forceRefresh: false },
+        );
+        if (isDisposed) {
+          return;
+        }
+        setAvailableAgents(catalog.items);
+        setAgentLoadError(null);
+        setSelectedAgentId((current) => {
+          if (current && catalog.items.some((item) => item.agent_id === current)) {
+            return current;
+          }
+          return catalog.defaultAgentId || catalog.items[0]?.agent_id || "";
+        });
+      } catch (error) {
+        if (isDisposed) {
+          return;
+        }
+        const message =
+          error instanceof Error ? error.message : "Không thể tải danh sách model.";
+        if (/invalid token|not authenticated|401|unauthorized/i.test(message)) {
+          void handleLogout("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+          return;
+        }
+        setAgentLoadError(message);
+      } finally {
+        if (!isDisposed) {
+          setIsLoadingAgents(false);
+        }
+      }
+    })();
+
+    return () => {
+      isDisposed = true;
+    };
+  }, [handleLogout, isAuthenticated]);
 
   const handleClearMessages = useCallback(() => {
     setMessages([]);
@@ -363,11 +438,12 @@ export default function Home() {
         await sendMessage(
           { text: value },
           {
-            body: activeConversationId
-              ? {
-                  conversation_id: activeConversationId,
-                }
-              : {},
+            body: {
+              ...(activeConversationId
+                ? { conversation_id: activeConversationId }
+                : {}),
+              ...(selectedAgentId ? { agent_id: selectedAgentId } : {}),
+            },
           },
         );
       } catch (error) {
@@ -385,6 +461,10 @@ export default function Home() {
 
   const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     setInput(event.target.value);
+  };
+
+  const handleAgentChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedAgentId(event.target.value);
   };
 
   return (
@@ -464,11 +544,17 @@ export default function Home() {
           input={input}
           isLoading={
             isCheckingAuth ||
+            isLoadingAgents ||
             isLoadingConversation ||
             isSwitchingConversation ||
             status === "submitted" ||
             status === "streaming"
           }
+          selectedAgentId={selectedAgentId}
+          onAgentChange={handleAgentChange}
+          agents={availableAgents}
+          isLoadingAgents={isLoadingAgents}
+          agentLoadError={agentLoadError}
           onInputChange={handleInputChange}
           onSubmit={handleSubmit}
         />

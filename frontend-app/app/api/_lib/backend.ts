@@ -5,6 +5,7 @@ export const BACKEND_ENDPOINTS = {
   login: "/api/login",
   register: "/api/register",
   chat: "/api/chat",
+  chatAgents: "/api/chat/agents",
   history: "/api/history",
   historyDetail: (conversationId: string) =>
     `/api/history/${encodeURIComponent(conversationId)}`,

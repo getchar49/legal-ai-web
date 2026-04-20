@@ -16,6 +16,7 @@ type IncomingMessage = {
 type IncomingPayload = {
   message?: string;
   conversation_id?: string;
+  agent_id?: string;
   messages?: IncomingMessage[];
 };
 
@@ -258,6 +259,7 @@ export async function POST(request: NextRequest) {
   const userMessage = extractUserMessage(payload);
   const conversationId =
     typeof payload.conversation_id === "string" ? payload.conversation_id : "";
+  const agentId = typeof payload.agent_id === "string" ? payload.agent_id : "";
 
   if (!userMessage) {
     return NextResponse.json(
@@ -277,6 +279,7 @@ export async function POST(request: NextRequest) {
       message: userMessage,
       conversation_id: conversationId,
       stream: true,
+      ...(agentId ? { agent_id: agentId } : {}),
     }),
     cache: "no-store",
   });

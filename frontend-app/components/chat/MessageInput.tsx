@@ -6,9 +6,20 @@ import type {
 } from "react";
 import { CHAT_UI_VISIBILITY } from "@/components/chat/chatUiConfig";
 
+type AgentOption = {
+  agent_id: string;
+  name: string;
+  description: string;
+};
+
 type MessageInputProps = {
   input: string;
   isLoading: boolean;
+  selectedAgentId: string;
+  onAgentChange: ChangeEventHandler<HTMLSelectElement>;
+  agents: AgentOption[];
+  isLoadingAgents: boolean;
+  agentLoadError?: string | null;
   onInputChange: ChangeEventHandler<HTMLTextAreaElement>;
   onSubmit: FormEventHandler<HTMLFormElement>;
 };
@@ -16,6 +27,11 @@ type MessageInputProps = {
 export default function MessageInput({
   input,
   isLoading,
+  selectedAgentId,
+  onAgentChange,
+  agents,
+  isLoadingAgents,
+  agentLoadError,
   onInputChange,
   onSubmit,
 }: MessageInputProps) {
@@ -66,6 +82,39 @@ export default function MessageInput({
           onSubmit={onSubmit}
           className="relative bg-surface-container-lowest diffusion-shadow rounded-2xl p-2 flex flex-col border border-outline-variant/10 focus-within:border-primary/30 transition-all"
         >
+          <div className="flex flex-wrap items-center justify-between gap-3 px-3 sm:px-4 py-2.5 border-b border-outline-variant/10">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-base text-primary">
+                auto_awesome
+              </span>
+              <span className="text-xs font-semibold tracking-wide text-on-surface-variant">
+                Model
+              </span>
+            </div>
+            <select
+              value={selectedAgentId}
+              onChange={onAgentChange}
+              disabled={isLoadingAgents || agents.length === 0}
+              className="min-w-48 max-w-full rounded-xl border border-outline-variant/20 bg-surface px-3 py-1.5 text-xs sm:text-sm text-on-surface shadow-sm focus:border-primary/40 focus:outline-none disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              {isLoadingAgents ? (
+                <option value="">Đang tải model...</option>
+              ) : null}
+              {!isLoadingAgents && agents.length === 0 ? (
+                <option value="">Không có model</option>
+              ) : null}
+              {agents.map((agent) => (
+                <option key={agent.agent_id} value={agent.agent_id}>
+                  {agent.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          {agentLoadError ? (
+            <p className="px-4 pt-2 text-xs text-amber-700 dark:text-amber-300">
+              {agentLoadError}
+            </p>
+          ) : null}
           {CHAT_UI_VISIBILITY.messageInput.showTopicTemplates ? (
             <div className="flex items-center gap-2 px-4 py-2 overflow-x-auto border-b border-outline-variant/5 mb-1">
               <span className="text-[10px] font-bold text-primary-container bg-primary-fixed px-2 py-0.5 rounded uppercase">
