@@ -258,8 +258,8 @@ export default function Sidebar({
                   key={item.id}
                   className={
                     item.id === activeConversationId
-                      ? "bg-white dark:bg-slate-800 text-indigo-900 dark:text-indigo-100 border-l-4 border-indigo-900 dark:border-indigo-400 flex items-center gap-2 px-2 py-2 rounded-r-lg transition-colors duration-200"
-                      : "text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800/50 flex items-center gap-2 px-2 py-2 rounded-lg transition-colors duration-200"
+                      ? "group/history bg-white dark:bg-slate-800 text-indigo-900 dark:text-indigo-100 border-l-4 border-indigo-900 dark:border-indigo-400 flex items-center gap-2 px-2 py-2 rounded-r-lg transition-colors duration-200"
+                      : "group/history text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800/50 flex items-center gap-2 px-2 py-2 rounded-lg transition-colors duration-200"
                   }
                 >
                   <button
@@ -283,7 +283,11 @@ export default function Sidebar({
                     onClick={() => {
                       void handleDeleteConversation(item.id);
                     }}
-                    className="material-symbols-outlined text-lg opacity-60 hover:opacity-100 px-2 py-1"
+                    className={`material-symbols-outlined text-lg px-2 py-1 transition-opacity ${
+                      isDeletingId === item.id
+                        ? "opacity-100"
+                        : "opacity-0 pointer-events-none group-hover/history:opacity-60 group-hover/history:pointer-events-auto focus-visible:opacity-100 focus-visible:pointer-events-auto hover:opacity-100"
+                    }`}
                     aria-label="Xóa cuộc trò chuyện"
                   >
                     {isDeletingId === item.id ? "hourglass_empty" : "delete"}

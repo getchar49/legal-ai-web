@@ -4,14 +4,12 @@ import Link from "next/link";
 import { CHAT_UI_VISIBILITY } from "@/components/chat/chatUiConfig";
 type HeaderProps = {
   hasToken: boolean;
-  onLogout: () => void;
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
 };
 
 export default function Header({
   hasToken,
-  onLogout,
   isSidebarOpen,
   onToggleSidebar,
 }: HeaderProps) {
@@ -29,7 +27,7 @@ export default function Header({
             {isSidebarOpen ? "menu_open" : "menu"}
           </span>
         </button>
-        <span className="font-headline font-bold text-lg text-primary">
+        <span className="relative inline-flex items-center font-headline font-bold text-lg text-primary pb-1 after:content-[''] after:absolute after:left-0 after:right-0 after:-bottom-px after:h-[3px] after:rounded-full after:bg-primary/90">
           Tư vấn pháp luật
         </span>
         <nav className="hidden md:flex gap-6">
@@ -84,12 +82,6 @@ export default function Header({
               <span className="material-symbols-outlined">account_balance</span>
             </button>
           ) : null}
-          <button
-            onClick={onLogout}
-            className="text-xs sm:text-sm font-headline font-semibold px-3 sm:px-4 py-2 rounded-full bg-slate-200 text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors"
-          >
-            Đăng xuất
-          </button>
         </div>
       ) : (
         <Link

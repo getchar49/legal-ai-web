@@ -38,6 +38,8 @@ export default function MessageInput({
   const formRef = useRef<HTMLFormElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const MAX_TEXTAREA_HEIGHT = 192;
+  const hasInput = input.trim().length > 0;
+  const canSubmit = !isLoading && hasInput;
 
   const resizeTextarea = (textarea: HTMLTextAreaElement | null) => {
     if (!textarea) {
@@ -74,7 +76,7 @@ export default function MessageInput({
   };
 
   return (
-    <footer className="w-full px-3 sm:px-6 md:px-12 lg:px-24 xl:px-40 pb-4 sm:pb-8 bg-gradient-to-t from-surface via-surface to-transparent pt-5 sm:pt-8">
+    <footer className="w-full px-3 sm:px-6 md:px-12 lg:px-24 xl:px-40 pb-4 sm:pb-8 bg-gradient-to-t from-surface via-surface to-transparent pt-5 sm:pt-8 border-t border-outline-variant/10 shadow-[0_-10px_24px_-20px_rgba(15,23,42,0.35)]">
       <div className="max-w-5xl mx-auto relative group">
         <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/10 to-indigo-500/10 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
         <form
@@ -146,14 +148,18 @@ export default function MessageInput({
             />
             <button
               type="submit"
-              disabled={isLoading || input.trim().length === 0}
-              className="legal-gradient w-10 h-10 rounded-full flex items-center justify-center text-on-primary diffusion-shadow active:scale-95 transition-transform mb-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!canSubmit}
+              className={`w-10 h-10 rounded-full flex items-center justify-center mb-1 active:scale-95 transition-all duration-200 ${
+                canSubmit
+                  ? "legal-gradient text-on-primary diffusion-shadow"
+                  : "bg-surface-container-high text-on-surface-variant/60 shadow-none cursor-not-allowed opacity-90"
+              }`}
             >
               <span className="material-symbols-outlined">send</span>
             </button>
           </div>
         </form>
-        <p className="text-center text-[10px] text-on-surface-variant/50 mt-4 tracking-wide font-medium">
+        <p className="text-center text-[10px] text-on-surface-variant/70 mt-4 tracking-wide font-medium">
           THE SOVEREIGN ASSOCIATE CÓ THỂ CUNG CẤP THÔNG TIN SAI LỆCH. VUI LÒNG
           KIỂM CHỨNG VỚI LUẬT SƯ CHUYÊN TRÁCH.
         </p>

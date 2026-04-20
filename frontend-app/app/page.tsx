@@ -522,7 +522,6 @@ export default function Home() {
       <main className="flex-1 flex flex-col relative bg-surface overflow-hidden">
         <Header
           hasToken={isAuthenticated}
-          onLogout={handleLogoutClick}
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={handleToggleSidebar}
         />

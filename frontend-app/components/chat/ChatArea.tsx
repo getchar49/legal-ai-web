@@ -79,7 +79,7 @@ function getMessageReasoning(message: ChatMessage): string {
 
 export default function ChatArea({ messages, isLoading, error }: ChatAreaProps) {
   return (
-    <section className="flex-1 overflow-y-auto px-3 sm:px-6 md:px-12 lg:px-24 xl:px-40 py-6 sm:py-8 space-y-6 sm:space-y-8 scroll-smooth">
+    <section className="flex-1 overflow-y-auto px-3 sm:px-6 md:px-12 lg:px-24 xl:px-40 py-6 sm:py-8 space-y-4 sm:space-y-5 scroll-smooth">
       <div className="flex justify-center">
         <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant/40 bg-surface-container-low px-4 py-1 rounded-full">
           Hôm nay
@@ -123,7 +123,7 @@ export default function ChatArea({ messages, isLoading, error }: ChatAreaProps) 
                 <div className="w-8 h-8 rounded-full legal-gradient flex items-center justify-center text-on-primary">
                   <span className="material-symbols-outlined text-sm">gavel</span>
                 </div>
-                <span className="text-xs font-bold text-primary tracking-widest uppercase">
+                <span className="text-xs font-semibold text-on-surface-variant/80 tracking-[0.14em] uppercase">
                   The Sovereign AI
                 </span>
               </div>
@@ -153,7 +153,7 @@ export default function ChatArea({ messages, isLoading, error }: ChatAreaProps) 
             <div className="w-8 h-8 rounded-full legal-gradient flex items-center justify-center text-on-primary">
               <span className="material-symbols-outlined text-sm">gavel</span>
             </div>
-            <span className="text-xs font-bold text-primary tracking-widest uppercase">
+            <span className="text-xs font-semibold text-on-surface-variant/80 tracking-[0.14em] uppercase">
               The Sovereign AI
             </span>
           </div>
