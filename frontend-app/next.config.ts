@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: [
     "*.ngrok-free.app",
     "*.ngrok.io",
+    "*.ngrok-free.dev"
   ],
 };
 

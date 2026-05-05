@@ -8,6 +8,9 @@ export const API_ROUTES = {
   chat: "/api/chat",
   chatAgents: "/api/chat/agents",
   history: "/api/history",
+  documents: {
+    file: "/api/documents/file",
+  },
 } as const;
 
 export const getHistoryDetailRoute = (conversationId: string) =>

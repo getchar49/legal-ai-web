@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import ChatArea from "@/components/chat/ChatArea";
+import CitationPanel from "@/components/chat/CitationPanel";
 import Header from "@/components/chat/Header";
 import MessageInput from "@/components/chat/MessageInput";
 import Sidebar from "@/components/chat/Sidebar";
@@ -19,9 +20,12 @@ import {
   readChatAgentCatalog,
   type ChatAgent,
 } from "@/app/_lib/chat-agent-catalog";
+import { type Citation, normalizeCitations } from "@/app/_lib/citations";
 
 type ConversationMetadata = {
   conversation_id?: string;
+  response_id?: string;
+  citations?: unknown;
 };
 
 type RawHistoryMessage = Record<string, unknown>;
@@ -90,13 +94,28 @@ const normalizeHistoryMessages = (data: unknown): UIMessage[] => {
         parts.push({ type: "text", text: answer });
       }
 
+      const citations =
+        role === "assistant" ? normalizeCitations(message.citations) : [];
+      const metadata: Record<string, unknown> = {};
+      if (citations.length > 0) {
+        metadata.citations = citations;
+      }
+
       return {
         id: extractString(message.id ?? message._id, `history-${index + 1}`),
         role,
         parts,
+        ...(Object.keys(metadata).length > 0 ? { metadata } : {}),
       } as UIMessage;
     })
-    .filter((message) => Array.isArray(message.parts) && message.parts.length > 0);
+    .filter(
+      (message) =>
+        (Array.isArray(message.parts) && message.parts.length > 0) ||
+        Boolean(
+          (message as UIMessage).metadata &&
+            ((message as UIMessage).metadata as Record<string, unknown>).citations,
+        ),
+    );
 };
 
 export default function Home() {
@@ -114,6 +133,7 @@ export default function Home() {
   const [selectedAgentId, setSelectedAgentId] = useState("");
   const [isLoadingAgents, setIsLoadingAgents] = useState(false);
   const [agentLoadError, setAgentLoadError] = useState<string | null>(null);
+  const [activeCitation, setActiveCitation] = useState<Citation | null>(null);
   const conversationCacheRef = useRef<Map<string, UIMessage[]>>(new Map());
   const openConversationRequestIdRef = useRef(0);
 
@@ -144,6 +164,7 @@ export default function Home() {
       setIsAuthenticated(false);
       setInput("");
       setActiveConversationId("");
+      setActiveCitation(null);
       conversationCacheRef.current.clear();
       clearChatAgentCatalogCache();
       setAvailableAgents([]);
@@ -283,7 +304,19 @@ export default function Home() {
   const handleClearMessages = useCallback(() => {
     setMessages([]);
     setInput("");
+    setActiveCitation(null);
   }, [setMessages]);
+
+  const handleOpenCitation = useCallback((citation: Citation) => {
+    setActiveCitation(citation);
+    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+      setIsSidebarOpen(false);
+    }
+  }, []);
+
+  const handleCloseCitation = useCallback(() => {
+    setActiveCitation(null);
+  }, []);
 
   const closeSidebarOnMobile = useCallback(() => {
     if (typeof window !== "undefined" && window.innerWidth < 1024) {
@@ -324,6 +357,7 @@ export default function Home() {
       }
 
       stop();
+      setActiveCitation(null);
       const cachedMessages = conversationCacheRef.current.get(conversationId);
       if (cachedMessages) {
         setMessages(cachedMessages);
@@ -538,6 +572,8 @@ export default function Home() {
               (status === "submitted" || status === "streaming"))
           }
           error={error ?? undefined}
+          activeCitationId={activeCitation?.id ?? null}
+          onOpenCitation={handleOpenCitation}
         />
         <MessageInput
           input={input}
@@ -558,6 +594,47 @@ export default function Home() {
           onSubmit={handleSubmit}
         />
       </main>
+
+      {activeCitation ? (
+        <button
+          type="button"
+          className="lg:hidden fixed inset-0 bg-black/35 z-40"
+          onClick={handleCloseCitation}
+          aria-label="Đóng tài liệu"
+        />
+      ) : null}
+
+      <div
+        className={`lg:hidden fixed inset-y-0 right-0 w-[92vw] max-w-md z-50 transition-transform duration-300 shadow-2xl ${
+          activeCitation ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {activeCitation ? (
+          <CitationPanel
+            citation={activeCitation}
+            onClose={handleCloseCitation}
+          />
+        ) : null}
+      </div>
+
+      <div
+        className={`hidden lg:block h-screen flex-shrink-0 border-l border-outline-variant/30 transition-[width] duration-300 ${
+          activeCitation ? "w-[28rem] xl:w-[32rem]" : "w-0"
+        }`}
+      >
+        <div
+          className={`h-full transition-opacity duration-200 ${
+            activeCitation ? "opacity-100" : "opacity-0 pointer-events-none"
+          }`}
+        >
+          {activeCitation ? (
+            <CitationPanel
+              citation={activeCitation}
+              onClose={handleCloseCitation}
+            />
+          ) : null}
+        </div>
+      </div>
     </div>
   );
 }

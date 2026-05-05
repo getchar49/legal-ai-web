@@ -9,6 +9,7 @@ export const BACKEND_ENDPOINTS = {
   history: "/api/history",
   historyDetail: (conversationId: string) =>
     `/api/history/${encodeURIComponent(conversationId)}`,
+  documentsFile: "/api/documents/file",
 } as const;
 
 export const getBackendBaseUrl = () =>

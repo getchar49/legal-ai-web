@@ -1,17 +1,26 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import {
+  type Citation,
+  normalizeCitations,
+  stripCitationBlock,
+} from "@/app/_lib/citations";
+import CitationsList from "@/components/chat/CitationsList";
 
 type ChatMessage = {
   id: string;
   role: string;
   content?: string;
   parts?: Array<{ type?: string; text?: string; state?: string }>;
+  metadata?: unknown;
 };
 
 type ChatAreaProps = {
   messages: ChatMessage[];
   isLoading: boolean;
   error?: Error;
+  activeCitationId?: string | null;
+  onOpenCitation?: (citation: Citation) => void;
 };
 
 const thinkTagPattern = /<think>([\s\S]*?)<\/think>/gi;
@@ -58,7 +67,7 @@ function getMessageText(message: ChatMessage): string {
     return rawText;
   }
 
-  return splitThinkTag(rawText).answer;
+  return stripCitationBlock(splitThinkTag(rawText).answer);
 }
 
 function getMessageReasoning(message: ChatMessage): string {
@@ -77,7 +86,21 @@ function getMessageReasoning(message: ChatMessage): string {
   return reasoningFromParts || parsedReasoningFromText;
 }
 
-export default function ChatArea({ messages, isLoading, error }: ChatAreaProps) {
+function getMessageCitations(message: ChatMessage): Citation[] {
+  if (message.role !== "assistant") {
+    return [];
+  }
+  const metadata = (message.metadata ?? {}) as Record<string, unknown>;
+  return normalizeCitations(metadata.citations);
+}
+
+export default function ChatArea({
+  messages,
+  isLoading,
+  error,
+  activeCitationId,
+  onOpenCitation,
+}: ChatAreaProps) {
   return (
     <section className="flex-1 overflow-y-auto px-3 sm:px-6 md:px-12 lg:px-24 xl:px-40 py-6 sm:py-8 space-y-4 sm:space-y-5 scroll-smooth">
       <div className="flex justify-center">
@@ -96,9 +119,10 @@ export default function ChatArea({ messages, isLoading, error }: ChatAreaProps) 
         messages.map((message) => {
           const text = getMessageText(message);
           const reasoning = getMessageReasoning(message);
+          const citations = getMessageCitations(message);
           const isUser = message.role === "user";
 
-          if (!text && !reasoning) {
+          if (!text && !reasoning && citations.length === 0) {
             return null;
           }
 
@@ -138,9 +162,20 @@ export default function ChatArea({ messages, isLoading, error }: ChatAreaProps) 
                     </div>
                   </details>
                 ) : null}
-                <div className="font-body text-base leading-loose text-on-surface [&_h1]:mb-2 [&_h1]:mt-3 [&_h1]:text-lg [&_h1]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3 [&_h2]:text-base [&_h2]:font-semibold [&_h3]:mb-2 [&_h3]:mt-3 [&_h3]:text-base [&_h3]:font-semibold [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
-                </div>
+                {text ? (
+                  <div className="font-body text-base leading-loose text-on-surface [&_h1]:mb-2 [&_h1]:mt-3 [&_h1]:text-lg [&_h1]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3 [&_h2]:text-base [&_h2]:font-semibold [&_h3]:mb-2 [&_h3]:mt-3 [&_h3]:text-base [&_h3]:font-semibold [&_ol]:my-2 [&_ol]:list-decimal [&_ol]:pl-5 [&_p]:my-2 [&_ul]:my-2 [&_ul]:list-disc [&_ul]:pl-5">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{text}</ReactMarkdown>
+                  </div>
+                ) : null}
+                {citations.length > 0 ? (
+                  <CitationsList
+                    citations={citations}
+                    activeCitationId={activeCitationId ?? null}
+                    onOpen={(citation) => {
+                      onOpenCitation?.(citation);
+                    }}
+                  />
+                ) : null}
               </div>
             </div>
           );

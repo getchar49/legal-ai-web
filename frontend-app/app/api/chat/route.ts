@@ -20,10 +20,27 @@ type IncomingPayload = {
   messages?: IncomingMessage[];
 };
 
+type BackendCitationItem = {
+  id?: unknown;
+  title?: unknown;
+  source_url?: unknown;
+  available?: unknown;
+  category?: unknown;
+  filename?: unknown;
+  media_type?: unknown;
+  download_url?: unknown;
+};
+
 type BackendStreamEvent =
   | { type: "reasoning"; content?: string }
   | { type: "delta"; content?: string }
-  | { type: "done"; conversation_id?: string }
+  | { type: "citations"; items?: BackendCitationItem[] }
+  | { type: "conversation"; conversation_id?: string }
+  | {
+      type: "done";
+      conversation_id?: string;
+      response_id?: string;
+    }
   | { type: "error"; message?: string };
 
 type BackendJsonResponse = {
@@ -83,6 +100,31 @@ const createUiMessageChunkStreamFromBackendSse = (
       let reasoningStarted = false;
       let textEnded = false;
       let finished = false;
+      let conversationId: string | undefined;
+      let responseId: string | undefined;
+      let citations: unknown[] | undefined;
+
+      const sendMessageMetadata = () => {
+        const messageMetadata: Record<string, unknown> = {};
+        if (conversationId) {
+          messageMetadata.conversation_id = conversationId;
+        }
+        if (responseId) {
+          messageMetadata.response_id = responseId;
+        }
+        if (citations) {
+          messageMetadata.citations = citations;
+        }
+        if (Object.keys(messageMetadata).length === 0) {
+          return;
+        }
+        controller.enqueue(
+          toSseChunk({
+            type: "message-metadata",
+            messageMetadata,
+          }),
+        );
+      };
 
       const closeOpenChunks = () => {
         if (reasoningStarted) {
@@ -148,6 +190,22 @@ const createUiMessageChunkStreamFromBackendSse = (
           return;
         }
 
+        if (event.type === "conversation") {
+          if (event.conversation_id) {
+            conversationId = event.conversation_id;
+            sendMessageMetadata();
+          }
+          return;
+        }
+
+        if (event.type === "citations") {
+          if (Array.isArray(event.items)) {
+            citations = event.items;
+            sendMessageMetadata();
+          }
+          return;
+        }
+
         if (event.type === "error") {
           closeOpenChunks();
           controller.enqueue(
@@ -161,13 +219,12 @@ const createUiMessageChunkStreamFromBackendSse = (
 
         if (event.type === "done") {
           if (event.conversation_id) {
-            controller.enqueue(
-              toSseChunk({
-                type: "message-metadata",
-                messageMetadata: { conversation_id: event.conversation_id },
-              }),
-            );
+            conversationId = event.conversation_id;
           }
+          if (event.response_id) {
+            responseId = event.response_id;
+          }
+          sendMessageMetadata();
           closeOpenChunks();
         }
       };
