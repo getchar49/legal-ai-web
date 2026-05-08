@@ -21,6 +21,7 @@ import {
   type ChatAgent,
 } from "@/app/_lib/chat-agent-catalog";
 import { type Citation, normalizeCitations } from "@/app/_lib/citations";
+import { clearDocumentCache } from "@/app/_lib/document-cache";
 
 type ConversationMetadata = {
   conversation_id?: string;
@@ -167,6 +168,7 @@ export default function Home() {
       setActiveCitation(null);
       conversationCacheRef.current.clear();
       clearChatAgentCatalogCache();
+      clearDocumentCache();
       setAvailableAgents([]);
       setSelectedAgentId("");
       setAgentLoadError(null);
@@ -605,12 +607,13 @@ export default function Home() {
       ) : null}
 
       <div
-        className={`lg:hidden fixed inset-y-0 right-0 w-[92vw] max-w-md z-50 transition-transform duration-300 shadow-2xl ${
+        className={`lg:hidden fixed inset-y-0 right-0 z-50 w-full max-w-full transition-transform duration-300 shadow-2xl sm:max-w-[36rem] md:max-w-[40rem] ${
           activeCitation ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {activeCitation ? (
           <CitationPanel
+            key={`mobile-${activeCitation.id}`}
             citation={activeCitation}
             onClose={handleCloseCitation}
           />
@@ -619,7 +622,9 @@ export default function Home() {
 
       <div
         className={`hidden lg:block h-screen flex-shrink-0 border-l border-outline-variant/30 transition-[width] duration-300 ${
-          activeCitation ? "w-[28rem] xl:w-[32rem]" : "w-0"
+          activeCitation
+            ? "w-[min(50vw,30rem)] xl:w-[min(46vw,38rem)] 2xl:w-[min(42vw,44rem)]"
+            : "w-0"
         }`}
       >
         <div
@@ -629,6 +634,7 @@ export default function Home() {
         >
           {activeCitation ? (
             <CitationPanel
+              key={`desktop-${activeCitation.id}`}
               citation={activeCitation}
               onClose={handleCloseCitation}
             />

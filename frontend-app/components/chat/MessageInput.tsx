@@ -78,11 +78,12 @@ export default function MessageInput({
   return (
     <footer className="w-full px-3 sm:px-6 md:px-12 lg:px-24 xl:px-40 pb-4 sm:pb-8 bg-gradient-to-t from-surface via-surface to-transparent pt-5 sm:pt-8 border-t border-outline-variant/10 shadow-[0_-10px_24px_-20px_rgba(15,23,42,0.35)]">
       <div className="max-w-5xl mx-auto relative group">
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/10 to-indigo-500/10 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500" />
+        {/* Focus glow — only animates opacity, never theme colors. */}
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/10 to-indigo-500/10 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition-opacity duration-500" />
         <form
           ref={formRef}
           onSubmit={onSubmit}
-          className="relative bg-surface-container-lowest diffusion-shadow rounded-2xl p-2 flex flex-col border border-outline-variant/10 focus-within:border-primary/30 transition-all"
+          className="relative bg-surface-container-lowest diffusion-shadow rounded-2xl p-2 flex flex-col border border-outline-variant/10 focus-within:border-primary/30 transition-[border-color] duration-150"
         >
           <div className="flex flex-wrap items-center justify-between gap-3 px-3 sm:px-4 py-2.5 border-b border-outline-variant/10">
             <div className="flex items-center gap-2">
@@ -149,7 +150,7 @@ export default function MessageInput({
             <button
               type="submit"
               disabled={!canSubmit}
-              className={`w-10 h-10 rounded-full flex items-center justify-center mb-1 active:scale-95 transition-all duration-200 ${
+              className={`w-10 h-10 rounded-full flex items-center justify-center mb-1 active:scale-95 transition-[transform,opacity] duration-200 ${
                 canSubmit
                   ? "legal-gradient text-on-primary diffusion-shadow"
                   : "bg-surface-container-high text-on-surface-variant/60 shadow-none cursor-not-allowed opacity-90"

@@ -157,14 +157,13 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: Inter, sans-serif;
-  transition: background-color 200ms ease, color 200ms ease;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  body {
-    transition: none;
-  }
-}
+/* The theme transition guard now lives in `app/_lib/theme.tsx` — it
+ * injects a temporary <style> element rather than relying on a CSS
+ * attribute selector, so it cannot lose to Tailwind's layered utility
+ * rules. Keeping the suppression off-stylesheet also means we never
+ * accidentally ship a global `transition: none` in the static bundle. */
 
 .material-symbols-outlined {
   font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
@@ -196,4 +195,18 @@ body {
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* Indeterminate progress strip used by the citation preview while the
+ * total file size is unknown (no Content-Length response header). */
+@keyframes citation-indeterminate {
+  0% {
+    transform: translateX(0%);
+  }
+  50% {
+    transform: translateX(220%);
+  }
+  100% {
+    transform: translateX(440%);
+  }
 }

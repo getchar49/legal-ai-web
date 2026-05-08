@@ -55,12 +55,12 @@ export default function CitationsList({
           Nguồn tham khảo
         </span>
       </div>
-      <ul className="flex flex-wrap gap-2">
+      <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {citations.map((citation, index) => {
           const isActive = activeCitationId === citation.id;
           const subtitle = buildItemSubtitle(citation);
           const baseClassName =
-            "group flex max-w-full items-start gap-2 rounded-lg border px-3 py-2 text-left transition-colors";
+            "group flex w-full max-w-full items-start gap-2 rounded-lg border px-3 py-2 text-left transition-colors";
           const stateClassName = !citation.available
             ? "border-outline-variant/30 bg-surface-container-low text-on-surface-variant/60 cursor-not-allowed"
             : isActive
@@ -114,7 +114,7 @@ export default function CitationsList({
                     ? "Xem tài liệu trích dẫn"
                     : "Tài liệu không có sẵn"
                 }
-                className={`${baseClassName} ${stateClassName}`}
+                className={`${baseClassName} ${stateClassName} min-h-16`}
               >
                 {content}
               </button>

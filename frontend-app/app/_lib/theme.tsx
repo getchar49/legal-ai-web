@@ -57,11 +57,97 @@ const getSystemTheme = (): ResolvedTheme => {
     : "light";
 };
 
+/**
+ * Suppresses CSS transitions for the duration of a theme swap.
+ *
+ * Without this, anything using `transition-all`, `transition`, or
+ * Tailwind v4's animatable `@property --tw-gradient-from` etc. will
+ * animate on its own clock while CSS-variable driven surfaces flip
+ * instantly, producing the "staggered flash" between the chat
+ * background and the input bubble.
+ *
+ * Strategy:
+ *   1. Inject a `<style>` element into <head> that disables every
+ *      transition and animation with `!important`. The selector uses
+ *      the universal `*` so it always wins on specificity once the
+ *      `!important` is applied.
+ *   2. Force a synchronous layout (`offsetHeight`) so the rule is
+ *      committed *before* the next style change toggles `.dark`.
+ *   3. Toggle `.dark`. Because transitions are now suppressed, every
+ *      element settles on its new colors in the same paint frame.
+ *   4. After two animation frames, remove the injected style. Any
+ *      pending paint has already finished, so re-enabling transitions
+ *      cannot retroactively start one.
+ *
+ * The injected stylesheet approach is more robust than an attribute
+ * selector because it never has to compete with Tailwind's layered
+ * utility rules.
+ */
+const THEME_GUARD_STYLE_ID = "theme-transition-guard";
+
+const installTransitionGuard = (): (() => void) | null => {
+  if (typeof document === "undefined") return null;
+  if (document.getElementById(THEME_GUARD_STYLE_ID)) {
+    // Another swap is already in progress; piggy-back on the existing
+    // guard rather than installing a second one.
+    return () => undefined;
+  }
+
+  const styleEl = document.createElement("style");
+  styleEl.id = THEME_GUARD_STYLE_ID;
+  styleEl.appendChild(
+    document.createTextNode(
+      // Universal selector + !important wins over every Tailwind utility,
+      // including the gradient `@property` declarations that would
+      // otherwise interpolate colors during a class flip.
+      "*,*::before,*::after{" +
+        "transition-property:none!important;" +
+        "transition-duration:0s!important;" +
+        "transition-delay:0s!important;" +
+        "animation-duration:0s!important;" +
+        "animation-delay:0s!important;" +
+        "}",
+    ),
+  );
+  document.head.appendChild(styleEl);
+
+  // Force a layout flush so the suppression rule is part of the next
+  // style recalculation, before `.dark` toggles below.
+  if (document.body) {
+    void document.body.offsetHeight;
+  }
+
+  return () => {
+    styleEl.parentNode?.removeChild(styleEl);
+  };
+};
+
 const applyTheme = (resolved: ResolvedTheme) => {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
-  root.classList.toggle("dark", resolved === "dark");
+  const wantsDark = resolved === "dark";
+  if (root.classList.contains("dark") === wantsDark) {
+    root.style.colorScheme = resolved;
+    return;
+  }
+
+  const removeGuard = installTransitionGuard();
+  root.classList.toggle("dark", wantsDark);
   root.style.colorScheme = resolved;
+
+  if (!removeGuard) {
+    return;
+  }
+  if (typeof window === "undefined") {
+    removeGuard();
+    return;
+  }
+  // Two RAFs ensure the new variable values have actually painted
+  // before transitions are re-enabled — a single RAF can fire before
+  // the style recalculation in some browsers.
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(removeGuard);
+  });
 };
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
